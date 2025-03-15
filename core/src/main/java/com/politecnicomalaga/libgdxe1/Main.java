@@ -7,7 +7,6 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.ScreenUtils;
 
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -42,10 +41,13 @@ public class Main extends ApplicationAdapter {
     private List<DisparoAliado> disparosaliados;
     private List<DisparoEnemigo> disparosenemigos;
 
+    // Instancia de la clase Fondo
+    private Fondo fondo;
+
     @Override
     public void create() {
-        disparosaliados =new ArrayList<>();
-        disparosenemigos =new ArrayList<>();
+        disparosaliados = new ArrayList<>();
+        disparosenemigos = new ArrayList<>();
         /* AAR
             Método de inicialización de los atributos. Hace la función de "constructor", pero sin serlo. El constructor
             ApplicationAdapter es el encargado de llamar a este método. Lo veremos en profundidad cuando estudiemos herencia
@@ -54,19 +56,21 @@ public class Main extends ApplicationAdapter {
         image = new Texture("mouse.png");
         player = new Texture("download.png");
         endImage = new Texture("end.png");
-        iDireccion =0;
-        iPosXImagen=200;
-        iPosYImagen=200;
+        iDireccion = 0;
+        iPosXImagen = 200;
+        iPosYImagen = 200;
 
-        fPosXPlayer=500;
-        fPosYPlayer=200;
-        fVelPlayer=6f;
+        fPosXPlayer = 500;
+        fPosYPlayer = 200;
+        fVelPlayer = 6f;
         bGanamos = false;
+
+        // Inicializar el fondo con las dimensiones de la pantalla
+        fondo = new Fondo("fondo.jpeg", 5f, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
     }
 
     @Override
     public void render() {
-
         /*  AAR
             Método corazón de todos los videojuegos Libgdx
             Aquí solemos tener:
@@ -81,34 +85,32 @@ public class Main extends ApplicationAdapter {
         //------------------------------
         //Control de entrada
         //------------------------------
-
         if (Gdx.input.justTouched()) {
-            //Si entramos aquí es que se ha tocado/clicado la pantalla entre el anterior "render" y este
+            // Si entramos aquí es que se ha tocado/clicado la pantalla entre el anterior "render" y este
             iPosXClicked = Gdx.input.getX();
             iPosYClicked = Gdx.input.getY();
 
-
-            if (iPosXClicked<fPosXPlayer) {
-                iDireccion=2;
-            } else if (iPosXClicked>fPosXPlayer) {
-                iDireccion=3;
+            if (iPosXClicked < fPosXPlayer) {
+                iDireccion = 2;
+            } else if (iPosXClicked > fPosXPlayer) {
+                iDireccion = 3;
             }
             iPosYClicked = Gdx.graphics.getHeight() - Gdx.input.getY();
             if (iPosYClicked > fPosYPlayer) {
-                DisparoAliado disparoAliado = new DisparoAliado(fPosXPlayer, fPosYPlayer + 20);//vamos para arriba
+                DisparoAliado disparoAliado = new DisparoAliado(fPosXPlayer, fPosYPlayer + 20); // vamos para arriba
                 disparosaliados.add(disparoAliado);
             }
             disparosaliados.removeIf(disparo -> disparo.getPosy() > 1080);
             disparosaliados.removeIf(disparo -> disparo.getPosy() < 0);
 
             if (bGanamos) {
-                iDireccion =0;
-                iPosXImagen=200;
-                iPosYImagen=200;
+                iDireccion = 0;
+                iPosXImagen = 200;
+                iPosYImagen = 200;
 
-                fPosXPlayer=300;
-                fPosYPlayer=300;
-                fVelPlayer=0.5f;
+                fPosXPlayer = 300;
+                fPosYPlayer = 300;
+                fVelPlayer = 0.5f;
                 bGanamos = false;
             }
         }
@@ -116,7 +118,6 @@ public class Main extends ApplicationAdapter {
         //------------------------------
         //Simulación del mundo
         //------------------------------
-        //Dependiendo de la dirección, tenemos que actualizar las posiciones del jugador.
         if (!bGanamos) {
             switch (iDireccion) {
                 case 2:
@@ -125,52 +126,52 @@ public class Main extends ApplicationAdapter {
                 case 3:
                     fPosXPlayer += fVelPlayer;
                     break;
+            }
 
-            }
-            for (Disparo disparo: disparosaliados) {
+            for (Disparo disparo : disparosaliados) {
                 disparo.mover();
             }
-            for (Disparo disparo: disparosenemigos) {
+            for (Disparo disparo : disparosenemigos) {
                 disparo.mover();
             }
-            //Evitamos que se salga
-            if (fPosXPlayer>Gdx.graphics.getWidth()-image.getWidth()) fPosXPlayer = Gdx.graphics.getWidth()-image.getWidth();
-            if (fPosYPlayer>Gdx.graphics.getHeight()-image.getWidth()) fPosYPlayer = Gdx.graphics.getHeight()-image.getWidth();
-            if (fPosXPlayer<0) fPosXPlayer = 0;
-            if (fPosYPlayer<0) fPosYPlayer = 0;
+
+            // Evitar que el jugador se salga de la pantalla
+            if (fPosXPlayer > Gdx.graphics.getWidth() - player.getWidth()) fPosXPlayer = Gdx.graphics.getWidth() - player.getWidth();
+            if (fPosYPlayer > Gdx.graphics.getHeight() - player.getHeight()) fPosYPlayer = Gdx.graphics.getHeight() - player.getHeight();
+            if (fPosXPlayer < 0) fPosXPlayer = 0;
+            if (fPosYPlayer < 0) fPosYPlayer = 0;
         }
 
-        //También simulamos el "cambio" o "salto" de la imagen a perseguir
-        if (!bGanamos && Math.random()>0.99) {//0,1% de posibilidades de "saltar" en cada frame
+        // Cambiar posición de la imagen objetivo con cierta probabilidad
+        if (!bGanamos && Math.random() > 0.99) {
             Random dado = new Random();
             iPosXImagen = dado.nextInt(Gdx.graphics.getWidth());
             iPosYImagen = dado.nextInt(Gdx.graphics.getHeight());
         }
 
-        if (!bGanamos && Math.random()>0.99) {//0,1% de posibilidades de "saltar" en cada frame
-            DisparoEnemigo disparoEnemigo = new DisparoEnemigo(iPosXImagen, iPosYImagen -20);
+        // Generar disparos enemigos con cierta probabilidad
+        if (!bGanamos && Math.random() > 0.99) {
+            DisparoEnemigo disparoEnemigo = new DisparoEnemigo(iPosXImagen, iPosYImagen - 20);
             disparosenemigos.add(disparoEnemigo);
         }
+
         //------------------------------
         //Control de cambios
         //------------------------------
-
-        //Si han colisionado, hemos ganado
-        for (Disparo disparo: disparosaliados) {
-            if (colisionan(disparo.getPosx(),disparo.getPosy(),iPosXImagen,iPosYImagen, image.getWidth())) {
-                //ganamos
+        for (Disparo disparo : disparosaliados) {
+            if (colisionan(disparo.getPosx(), disparo.getPosy(), iPosXImagen, iPosYImagen, image.getWidth())) {
+                // Ganamos
                 bGanamos = true;
-            }
-            else {
+            } else {
                 disparo.mover();
             }
         }
-        for (Disparo disparo: disparosenemigos) {
-            if (colisionan(disparo.getPosx(),disparo.getPosy(),fPosXPlayer,fPosYPlayer, image.getWidth())) {
-                //ganamos
+
+        for (Disparo disparo : disparosenemigos) {
+            if (colisionan(disparo.getPosx(), disparo.getPosy(), fPosXPlayer, fPosYPlayer, image.getWidth())) {
+                // Ganamos
                 bGanamos = true;
-            }
-            else {
+            } else {
                 disparo.mover();
             }
         }
@@ -179,29 +180,28 @@ public class Main extends ApplicationAdapter {
         // Dibujar
         //------------------------------
 
-        //Dibujar. Es donde hacemos que el "mundo" del videojuego muestre sus datos al jugador
-        //clear. Se trata de limpiar la pantalla. Siempre antes de empezar a dibujar cualquier cosa
+        // Limpiar la pantalla
         ScreenUtils.clear(0.15f, 0.15f, 0.2f, 1f);
 
-        //Rutina típica de dibujado. Hay que llamar obligatoriamente a begin y a end
         batch.begin();
 
-        //Aquí los draw...
-        if(bGanamos) {
+        // Dibujar el fondo
+        fondo.dibujar(batch);
+
+        // Dibujar otros elementos del juego
+        if (bGanamos) {
             batch.draw(endImage, 80, 0);
         } else {
             batch.draw(image, iPosXImagen, iPosYImagen);
             batch.draw(player, fPosXPlayer, fPosYPlayer, 100, 100);
-            for(Disparo disparo : disparosaliados) {
+            for (Disparo disparo : disparosaliados) {
                 disparo.dibujar(batch);
             }
-            for(Disparo disparo : disparosenemigos) {
-                disparo.dibujar(batch);
-            }
-            for(Disparo disparo : disparosaliados) {
+            for (Disparo disparo : disparosenemigos) {
                 disparo.dibujar(batch);
             }
         }
+
         batch.end();
     }
 
@@ -211,14 +211,10 @@ public class Main extends ApplicationAdapter {
         image.dispose();
         player.dispose();
         endImage.dispose();
+        fondo.dispose();
     }
 
-    //Función colisiona. Determina cuando dos rectángulos están solapados en un espacio 2D
     public boolean colisionan(float fPosX1, float fPosY1, float fPosX2, float fPosY2, float fLado) {
-        //Lado es el ancho y alto de los cuadrados que representan al jugador y a la imagen.
-        //dos cuadrados se solapan parcial o totalmente si se solapan en el eje X y en el eje Y a la vez
-        //un solapamiento en X implica que x1 y x2 no estén más lejos que el tamaño del lado
-        //En Y, es lo mismo.
-        return (Math.abs(fPosX1-fPosX2)<fLado && Math.abs(fPosY1-fPosY2)<fLado);
+        return (Math.abs(fPosX1 - fPosX2) < fLado && Math.abs(fPosY1 - fPosY2) < fLado);
     }
 }
