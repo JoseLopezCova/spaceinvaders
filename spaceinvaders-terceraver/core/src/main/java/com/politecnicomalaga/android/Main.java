@@ -211,9 +211,13 @@ public class Main extends ApplicationAdapter {
 
         // Generar disparos enemigos con cierta probabilidad
         if (!bPerdemos && !bganamos) {
+            List<NaveEnemiga> navesEnemigas = new ArrayList<>();
+            for (Escuadron escuadron : batallon.getEscuadrones()) {
+                navesEnemigas.addAll(escuadron.getEnemigos());
+            }
             for (Escuadron escuadron : batallon.getEscuadrones()){
                 for (NaveEnemiga enemigo : escuadron.getEnemigos()){
-                    boolean generar = enemigo.generardisparo();
+                    boolean generar = enemigo.generardisparo(navesEnemigas);
                     if (generar){
                         if (enemigo.getIdireccion() == 1){
                             DisparoEnemigo disparoEnemigo = new DisparoEnemigo(enemigo.getX() + 15, enemigo.getY() -30, 4);

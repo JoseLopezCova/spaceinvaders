@@ -3,7 +3,9 @@ package com.politecnicomalaga.android;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import java.util.ArrayList;
 
+import java.util.List;
 import java.util.Random;
 
 public class NaveEnemiga extends Nave {
@@ -108,11 +110,25 @@ public class NaveEnemiga extends Nave {
         }
     }
 
-    public boolean generardisparo(){
+    public boolean generardisparo(List<NaveEnemiga> navesEnemigas){
         double d = Math.random();
-      if (d > 0.999) {
+      if (d > 0.999 && NaveMasBaja(navesEnemigas)) {
           return true;
       }
       return false;
     }
+
+    public boolean NaveMasBaja (List<NaveEnemiga> navesEnemigas){
+        for (NaveEnemiga nave : navesEnemigas){
+            if(nave.isVivo() && nave.getX() == this.getX() && nave.getY() < this.getY()){
+                return false;
+            }
+        }
+        return true;
+    }
+
 }
+
+
+
+
